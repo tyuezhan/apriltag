@@ -13,14 +13,16 @@ namespace apriltag_ros {
 
 class AprilTagDescription{
  public:
-  AprilTagDescription(int id, double size, std::string &frame_name):id_(id), size_(size), frame_name_(frame_name){}
+  AprilTagDescription(int id, double size, std::string &frame_name, int family):id_(id), size_(size), frame_name_(frame_name), family_(family){}
   double size(){return size_;}
   int id(){return id_;}
   std::string& frame_name(){return frame_name_;}
+  int family(){return family_;}
  private:
   int id_;
   double size_;
   std::string frame_name_;
+  int family_; // "Tag family, 0 - tf36h11, 1 - tf25h9, 2 - tf16h5"
 };
 
 class ApriltagPoseEstimator {

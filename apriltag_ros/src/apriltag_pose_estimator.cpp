@@ -215,7 +215,15 @@ void ApriltagPoseEstimator::InitApriltagMap() {
     double tag_size = description.size();
 
     am::Apriltag tag;
-    tag.family = "mit"; //TODO make these params? Or get from detections?
+    if (description.family() == 0)
+      tag.family = "tag36h11";
+    else if (description.family() == 1)
+      tag.family = "tag25h9";
+    else if (description.family() == 2)
+      tag.family = "tag16h5";
+    else
+      tag.family = "unknown";
+    // tag.family = "mit"; //TODO make these params? Or get from detections?
     tag.border = 1;
     tag.bits = 6;
 
@@ -249,9 +257,17 @@ std::map<int, AprilTagDescription> ApriltagPoseEstimator::parse_tag_descriptions
     ROS_ASSERT(tag_description.getType() == XmlRpc::XmlRpcValue::TypeStruct);
     ROS_ASSERT(tag_description["id"].getType() == XmlRpc::XmlRpcValue::TypeInt);
     ROS_ASSERT(tag_description["size"].getType() == XmlRpc::XmlRpcValue::TypeDouble);
+    ROS_ASSERT(tag_description["family"].getType() == XmlRpc::XmlRpcValue::TypeInt);
 
     int id = (int)tag_description["id"];
     double size = (double)tag_description["size"];
+    int family;
+    if(tag_description.hasMember("family")){
+      family = (int)tag_description["family"];
+    } else {
+      ROS_WARN("No family specified for tag %d, using default family 0", id);
+      family = 0;
+    }
 
     std::string frame_name;
     if(tag_description.hasMember("frame_id")){
@@ -263,8 +279,8 @@ std::map<int, AprilTagDescription> ApriltagPoseEstimator::parse_tag_descriptions
       frame_name_stream << "tag_" << id;
       frame_name = frame_name_stream.str();
     }
-    AprilTagDescription description(id, size, frame_name);
-    ROS_INFO_STREAM("Loaded tag config: "<<id<<", size: "<<size<<", frame_name: "<<frame_name);
+    AprilTagDescription description(id, size, frame_name, family);
+    ROS_INFO_STREAM("Loaded tag config: "<<id<<", size: "<<size<<", frame_name: "<<frame_name << ", family: "<<family);
     descriptions.insert(std::make_pair(id, description));
   }
   return descriptions;
